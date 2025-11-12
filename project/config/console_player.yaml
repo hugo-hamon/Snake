@@ -3,9 +3,9 @@ game:
   grid_height: 10
   wrap_around: true
   properties:
-    initial_speed: 150
-    speed_acceleration: 5
-    min_speed: 80
+    initial_speed: 100
+    speed_acceleration: 10
+    min_speed: 40
   strategy: player
 
 graphics:
