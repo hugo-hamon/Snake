@@ -13,11 +13,11 @@ A Python implementation of the classic Snake game with multiple viewing modes an
 
 ### Console View
 
-![Console View](images/console_view.png)
+![Console View](gif/console_view.gif)
 
 ### Pygame View
 
-![Pygame View](images/pygame_view.png)
+![Pygame View](gif/pygame_view.gif)
 
 ## Requirements
 
