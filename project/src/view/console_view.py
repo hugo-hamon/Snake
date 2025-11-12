@@ -131,7 +131,7 @@ class ConsoleView(BaseView):
             restart_line = "Press SPACE to restart"
             print(restart_line.center(info_width))
         else:
-            commands_line = "Commands: WASD/Arrows = Move | 0 = Auto | 1 = Dummy | T = Teleportation | ESC = Quit"
+            commands_line = "Commands: ZASD/Arrows = Move | 0 = Auto | 1 = Dummy | T = Teleportation | ESC = Quit"
             print(commands_line.ljust(info_width))
         
         # Add some blank lines to clear any leftover text from previous renders
