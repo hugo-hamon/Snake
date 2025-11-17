@@ -2,7 +2,7 @@ from .movement_strategy import MovementStrategy
 import random
 
 
-class HamiltonianMovementStrategy(MovementStrategy):
+class HamiltonianSkipMovementStrategy(MovementStrategy):
     """
     A strategy that follows a pre-calculated Hamiltonian cycle.
     This allows the snake to fill the entire grid without collisions.
@@ -56,7 +56,7 @@ class HamiltonianMovementStrategy(MovementStrategy):
                 next_direction = (1, 0)   # East
             elif original_y == 0 and curr_x != 0:
                 next_direction = (-1, 0)  # West
-            elif not is_up and original_y != 0 and (original_y > 1 or curr_x == ws):
+            elif original_y != 0 and (original_y > 1 or curr_x == ws):
                 next_direction = (0, 1)   # South (our y increases)
 
             if next_direction is None:
@@ -185,6 +185,32 @@ class HamiltonianMovementStrategy(MovementStrategy):
 
         self.hamiltonian_cycle = cycle
 
+    def get_neighbors(self, pos: tuple[int, int]) -> list[tuple[int, int, int]]:
+        """
+        Get the neighbors of a given position.
+        """
+        neighbors = []
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            new_pos = (pos[0] + dx, pos[1] + dy)
+            if 0 <= new_pos[0] < self.grid_width and 0 <= new_pos[1] < self.grid_height:
+                neighbors.append(
+                    (new_pos, self.hamiltonian_cycle.index(new_pos)))
+        return neighbors
+
+    def get_distance(self, ham_index1: int, ham_index2: int) -> int:
+        """
+        Get the distance between two Hamiltonian indices.
+        """
+        # If the length of the cycle if 16 the max index is 15 so dist(15, 0) = 1 because we loop around
+        # dist(0, 15) = 15
+        # dist(1, 15) = 14
+        # ...
+
+        if ham_index1 < ham_index2:
+            return ham_index2 - ham_index1
+        else:
+            return (len(self.hamiltonian_cycle) - ham_index1 + ham_index2) % len(self.hamiltonian_cycle)
+
     def get_move(self, snake_body: list[tuple[int, int]], food_pos: tuple[int, int] | None) -> tuple[int, int]:
         """
         Determine the next movement following the Hamiltonian cycle.
@@ -197,15 +223,60 @@ class HamiltonianMovementStrategy(MovementStrategy):
             return (1, 0)  # Default movement if the cycle generation failed
 
         head = snake_body[0]
+        tail = snake_body[-1]
+        apple = food_pos
         try:
-            current_index = self.hamiltonian_cycle.index(head)
+            head_ham_index = self.hamiltonian_cycle.index(head)
+            tail_ham_index = self.hamiltonian_cycle.index(tail)
+            apple_ham_index = self.hamiltonian_cycle.index(apple)
         except ValueError:
             # The snake head is not on the cycle (e.g., after a reset).
             # Return a default movement.
             return (1, 0)
 
-        next_index = (current_index + 1) % len(self.hamiltonian_cycle)
-        next_cell = self.hamiltonian_cycle[next_index]
+        head_neighbors = self.get_neighbors(head)
+
+        next_cell = None
+        snake_percent = len(snake_body) / (self.grid_width * self.grid_height)
+        threshold = 0.5
+        if head_ham_index > tail_ham_index and snake_percent < threshold:
+            # remove neighbors with index between tail_ham_index and head_ham_index
+            head_neighbors = [neighbor for neighbor in head_neighbors if neighbor[1]
+                              < tail_ham_index or neighbor[1] > head_ham_index]
+            # Sort neighbors by distance to apple
+            head_neighbors.sort(
+                key=lambda x: self.get_distance(x[1], apple_ham_index))
+            # For each neighbor if the distance with the tail is less than 10% of free space, remove it
+            free_space = 5
+            head_neighbors = [
+                neighbor for neighbor in head_neighbors if self.get_distance(neighbor[1], tail_ham_index) > free_space
+            ]
+            if head_neighbors:
+                next_cell = head_neighbors[0][0]
+        elif head_ham_index < tail_ham_index and snake_percent < threshold:
+            # keep neighbors with index between head_ham_index and tail_ham_index
+            head_neighbors = [neighbor for neighbor in head_neighbors if neighbor[1]
+                              > head_ham_index and neighbor[1] < tail_ham_index]
+            # Sort neighbors by distance to apple
+            head_neighbors.sort(
+                key=lambda x: self.get_distance(x[1], apple_ham_index))
+            # For each neighbor if the distance with the tail is less than 10% of free space, remove it
+            free_space = 5
+            head_neighbors = [
+                neighbor for neighbor in head_neighbors if self.get_distance(neighbor[1], tail_ham_index) > free_space
+            ]
+            if head_neighbors:
+                next_cell = head_neighbors[0][0]
+        elif head_ham_index == tail_ham_index:
+            # Shortest path to the apple
+            head_neighbors.sort(
+                key=lambda x: self.get_distance(x[1], apple_ham_index))
+            if head_neighbors:
+                next_cell = head_neighbors[0][0]
+
+        if next_cell is None:
+            next_index = (head_ham_index + 1) % len(self.hamiltonian_cycle)
+            next_cell = self.hamiltonian_cycle[next_index]
 
         dx = next_cell[0] - head[0]
         dy = next_cell[1] - head[1]

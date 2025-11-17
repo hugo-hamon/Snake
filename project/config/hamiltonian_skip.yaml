@@ -1,18 +1,18 @@
 game:
-  grid_width: 10
-  grid_height: 10
+  grid_width: 8
+  grid_height: 8
   wrap_around: true
   properties:
-    initial_speed: 100
+    initial_speed: 20
     speed_acceleration: 10
-    min_speed: 40
-  strategy: player
+    min_speed: 20
+  strategy: hamiltonian_skip
 
 hamiltonian:
   random_cycle: true
 
 graphics:
-  enable: false
+  enable: true
   sizes:
     cell_size: 20
     margin: 50
@@ -27,4 +27,3 @@ graphics:
     font_name: "consolas"
     font_size: 28
     font_size_large: 48
-  

@@ -3,7 +3,7 @@ import sys
 
 import pygame
 
-from ..strategies import PlayerMovementStrategy, HamiltonianMovementStrategy, DummyMovementStrategy
+from ..strategies import PlayerMovementStrategy, HamiltonianMovementStrategy, DummyMovementStrategy, HamiltonianSkipMovementStrategy
 from .input_handler import ConsoleInputHandler
 from ..view.pygame_view import PygameView
 from ..model.game_state import GameState
@@ -45,14 +45,23 @@ class GameController:
         self.player_strategy = PlayerMovementStrategy()
         self.auto_strategy = HamiltonianMovementStrategy(
             game_config["grid_width"],
-            game_config["grid_height"]
+            game_config["grid_height"],
+            config["hamiltonian"]["random_cycle"]
         )
         self.dummy_strategy = DummyMovementStrategy()
+        self.hamiltonian_skip_strategy = HamiltonianSkipMovementStrategy(
+            game_config["grid_width"],
+            game_config["grid_height"],
+            config["hamiltonian"]["random_cycle"]
+        )
 
         # Set initial strategy
         if game_config["strategy"].lower() == "cycle":
             self.current_strategy = self.auto_strategy
             self.current_strategy_name = "Cycle"
+        elif game_config["strategy"].lower() == "hamiltonian_skip":
+            self.current_strategy = self.hamiltonian_skip_strategy
+            self.current_strategy_name = "Hamiltonian Skip"
         elif game_config["strategy"].lower() == "player":
             self.current_strategy = self.player_strategy
             self.current_strategy_name = "Player"
@@ -281,6 +290,9 @@ class GameController:
                 # Limit the FPS for pygame
                 if isinstance(self.view, PygameView):
                     self.view.tick(60)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
         finally:
             # Cleanup
