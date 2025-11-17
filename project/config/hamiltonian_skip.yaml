@@ -1,11 +1,11 @@
 game:
-  grid_width: 50
-  grid_height: 50
+  grid_width: 8
+  grid_height: 8
   wrap_around: true
   properties:
-    initial_speed: 10
+    initial_speed: 20
     speed_acceleration: 10
-    min_speed: 10
+    min_speed: 20
   strategy: hamiltonian_skip
 
 hamiltonian:
