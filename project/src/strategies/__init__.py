@@ -1,3 +1,4 @@
+from .hamiltonian_skip_strategy import HamiltonianSkipMovementStrategy
 from .hamiltonian_strategy import HamiltonianMovementStrategy
 from .player_strategy import PlayerMovementStrategy
 from .dummy_strategy import DummyMovementStrategy
@@ -7,6 +8,7 @@ __all__ = [
     "MovementStrategy",
     "PlayerMovementStrategy",
     "HamiltonianMovementStrategy",
+    "HamiltonianSkipMovementStrategy",
     "DummyMovementStrategy",
 ]
 

@@ -7,6 +7,9 @@ game:
     speed_acceleration: 10
     min_speed: 40
   strategy: cycle
+  
+hamiltonian:
+  random_cycle: true
 
 graphics:
   enable: true
